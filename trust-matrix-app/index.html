@@ -5,29 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRUST MATRIX PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #0b1120; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        .card { background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; border-radius: 12px; }
-        .btn-num { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 8px; font-weight: bold; }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
-<body class="p-2" onload="configurarApp()">
+<body class="bg-[#0b1120] text-white p-2">
 
-    <div class="max-w-4xl mx-auto space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2 card p-2">
-                <div class="h-[450px] rounded-lg overflow-hidden bg-black">
-                    <iframe id="game-frame" src="https://stake.bet" width="100%" height="100%" frameborder="0"></iframe>
-                </div>
+    <div id="login-screen" class="fixed inset-0 bg-[#0b1120] z-[100] flex items-center justify-center p-4">
+        <div class="bg-slate-800 p-8 rounded-2xl border border-yellow-500 w-full max-w-sm space-y-6 shadow-2xl">
+            <h1 class="text-2xl font-black text-yellow-500 text-center italic">TRUST MATRIX</h1>
+            <div class="space-y-4">
+                <input type="email" id="email" placeholder="Seu e-mail" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none">
+                <input type="password" id="pass" placeholder="Sua senha" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none">
+                <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase">Entrar no Robô</button>
+                <button onclick="cadastrar()" class="w-full text-xs text-gray-400 underline">Criar novo cadastro</button>
             </div>
+        </div>
+    </div>
 
-            <div class="card p-4 text-center space-y-4">
-                <h1 class="text-xl font-black text-yellow-500 italic uppercase">Trust Matrix Pro</h1>
+    <div id="main-content" class="hidden max-w-6xl mx-auto space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2 bg-slate-900 rounded-xl overflow-hidden h-[500px] border border-gray-800 shadow-xl">
+                <iframe id="game-frame" src="" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+            <div class="bg-slate-800 p-5 rounded-xl border border-gray-700 text-center space-y-4">
+                <h2 class="text-yellow-500 font-black italic uppercase">Terminal 8-18-28</h2>
                 <div class="grid grid-cols-6 gap-1">
                     <script>
-                        for(let i=0; i<=36; i++) {
-                            document.write(`<button onclick="analisar(${i})" class="btn-num text-[10px] hover:bg-yellow-500 hover:text-black">${i}</button>`);
-                        }
+                        for(let i=0; i<=36; i++) document.write(`<button onclick="analisar(${i})" class="bg-slate-900 p-2 rounded text-[10px] font-bold border border-gray-700 hover:bg-yellow-500 hover:text-black">${i}</button>`);
                     </script>
                 </div>
                 <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase text-xs">Ativar Robô</button>
@@ -36,33 +41,58 @@
     </div>
 
     <script>
-        const CONFIG = {
-            TOKEN: "7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c", //
-            CHAT_ID: "-1003694254792", //
-            GATILHOS: [8, 18, 28] //
+        // CONFIGURAÇÃO REAL DO SEU FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
+            authDomain: "rd-turbo-bot.firebaseapp.com",
+            projectId: "rd-turbo-bot",
+            databaseURL: "https://rd-turbo-bot-default-rtdb.firebaseio.com",
+            storageBucket: "rd-turbo-bot.firebasestorage.app",
+            messagingSenderId: "681502711638",
+            appId: "1:681502711638:web:0b43afb70cae48bd1dc0f7"
         };
+        firebase.initializeApp(firebaseConfig);
 
         let autoStatus = false;
 
-        function configurarApp() {
-            const linkSalvo = localStorage.getItem('url_afiliado_trust');
-            if (linkSalvo) document.getElementById('game-frame').src = linkSalvo;
+        function login() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('pass').value;
+            firebase.auth().signInWithEmailAndPassword(e, p)
+                .then(() => { 
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-content').classList.remove('hidden');
+                    carregarLink();
+                })
+                .catch(err => alert("Erro: " + err.message));
         }
 
-        async function notify(msg) {
-            const url = `https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`;
-            await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" }) });
+        function cadastrar() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('pass').value;
+            firebase.auth().createUserWithEmailAndPassword(e, p)
+                .then((user) => {
+                    firebase.database().ref('usuarios/' + user.user.uid).set({ email: e });
+                    alert("Cadastro realizado! Clique em Entrar.");
+                }).catch(err => alert(err.message));
+        }
+
+        function carregarLink() {
+            firebase.database().ref('config/link').on('value', (s) => {
+                if(s.val()) document.getElementById('game-frame').src = s.val();
+            });
         }
 
         function toggleAuto() {
             autoStatus = !autoStatus;
-            document.getElementById('btn-auto').innerText = autoStatus ? "🔴 PARAR" : "🔵 ATIVAR ROBÔ";
+            document.getElementById('btn-auto').innerText = autoStatus ? "🔴 STOP" : "🔵 ATIVAR ROBÔ";
         }
 
         function analisar(n) {
-            if (CONFIG.GATILHOS.includes(n)) {
-                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Roleta: Oficial\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS:</b> 1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Max 1 Gale`;
-                if(autoStatus) notify(msg);
+            if ([8, 18, 28].includes(n) && autoStatus) {
+                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS:</b> 1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Max 1 Gale`;
+                const url = `https://api.telegram.org/bot7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c/sendMessage`;
+                fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({chat_id: "-1003694254792", text: msg, parse_mode: "HTML"})});
             }
         }
     </script>
