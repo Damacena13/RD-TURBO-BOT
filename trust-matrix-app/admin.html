@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>TRUST MATRIX - ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white p-6">
+    <div class="max-w-md mx-auto bg-slate-800 p-6 rounded-xl border-2 border-yellow-500 shadow-2xl">
+        <h1 class="text-2xl font-black text-yellow-500 mb-6 text-center italic">PAINEL DO DONO</h1>
+        
+        <div class="space-y-6">
+            <div>
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Link de Afiliado Ativo</label>
+                <input type="text" id="link-afiliado" placeholder="https://seu-link-aqui.com" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg mt-2 text-sm focus:ring-2 focus:ring-yellow-500 outline-none">
+            </div>
+            
+            <button onclick="atualizarSistema()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-xl uppercase transition-all shadow-lg active:scale-95">
+                Atualizar App dos Clientes
+            </button>
+            
+            <p id="msg-sucesso" class="text-center text-green-400 text-xs font-bold hidden">✅ LINK ATUALIZADO COM SUCESSO!</p>
+        </div>
+    </div>
+
+    <script>
+        function atualizarSistema() {
+            const link = document.getElementById('link-afiliado').value;
+            if(!link) { alert("Cole um link válido!"); return; }
+            
+            // Salva o link no "cérebro" do navegador para o index.html ler
+            localStorage.setItem('url_afiliado_trust', link);
+            
+            document.getElementById('msg-sucesso').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('msg-sucesso').classList.add('hidden'); }, 3000);
+        }
+    </script>
+</body>
+</html>
