@@ -4,47 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RD TURBO BOT</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
-        body { background-color: #0b1120; font-family: 'Inter', sans-serif; }
-        .login-card { border: 1px solid #eab308; background: #111827; }
+        body { background-color: #0b1120; font-family: 'Inter', sans-serif; color: white; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .game-card { transition: 0.3s; border: 1px solid #1e293b; }
+        .game-card:hover { border-color: #eab308; transform: translateY(-5px); }
+        .btn-gatilho { border: 2px solid #eab308 !important; color: #eab308; font-weight: 900; }
     </style>
 </head>
-<body class="text-white p-2">
+<body onload="checkLogin()">
+
     <div id="login-screen" class="fixed inset-0 bg-[#0b1120] z-[100] flex flex-col items-center justify-center p-4">
-        <img src="icon.png" alt="Logo RD TURBO BOT" class="w-32 h-32 mb-6 object-contain">
-        
-        <div class="login-card p-8 rounded-2xl w-full max-w-sm space-y-6 shadow-2xl text-center">
+        <img src="icon.jpg" class="w-24 h-24 rounded-full border-4 border-yellow-500 mb-6 shadow-2xl">
+        <div class="glass p-8 rounded-3xl w-full max-w-sm space-y-6 text-center border-yellow-500/30">
             <h1 class="text-2xl font-black text-yellow-500 italic uppercase">RD TURBO BOT</h1>
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="E-mail" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none">
-                <input type="password" id="pass" placeholder="Senha" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none">
-                <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase hover:bg-yellow-400 transition">ENTRAR</button>
-                <button onclick="cadastrar()" class="w-full text-xs text-gray-400 underline">Criar novo acesso</button>
+                <input type="email" id="email" placeholder="E-mail de acesso" class="w-full p-4 bg-slate-900 border border-gray-700 rounded-xl outline-none focus:border-yellow-500">
+                <input type="password" id="pass" placeholder="Sua senha" class="w-full p-4 bg-slate-900 border border-gray-700 rounded-xl outline-none focus:border-yellow-500">
+                <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase shadow-lg active:scale-95 transition">Entrar no Sistema</button>
+                <button onclick="cadastrar()" class="text-xs text-gray-400 underline">Solicitar novo acesso</button>
             </div>
         </div>
     </div>
 
-    <div id="main-content" class="hidden max-w-6xl mx-auto space-y-4 pt-4">
-        <div class="flex items-center justify-center gap-4 mb-4">
-            <img src="icon.png" alt="Logo" class="w-12 h-12 object-contain">
-            <h1 class="text-2xl font-black text-yellow-500 italic uppercase">RD TURBO BOT</h1>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2 bg-slate-900 rounded-xl overflow-hidden h-[500px] border border-gray-800">
-                <iframe id="game-frame" src="" width="100%" height="100%" frameborder="0"></iframe>
+    <div id="lobby" class="hidden min-h-screen p-4 pb-20">
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-2">
+                <img src="icon.jpg" class="w-10 h-10 rounded-full border border-yellow-500">
+                <h1 class="font-black text-yellow-500 italic uppercase tracking-tighter">RD TURBO</h1>
             </div>
-            <div class="bg-slate-800 p-5 rounded-xl border border-gray-700 text-center space-y-4 shadow-lg">
-                <div class="grid grid-cols-6 gap-1">
+            <div class="text-right">
+                <p class="text-[10px] text-gray-400 uppercase">Saldo Bancca</p>
+                <p class="text-green-400 font-bold">R$ 1.250,00</p>
+            </div>
+        </header>
+
+        <h2 class="text-sm font-bold text-gray-400 uppercase mb-4 tracking-widest">Escolha sua mesa:</h2>
+        <div class="grid grid-cols-2 gap-4" id="game-list">
+            <div onclick="abrirJogo('roleta')" class="game-card bg-slate-800 rounded-2xl overflow-hidden cursor-pointer shadow-lg">
+                <img src="https://img.freepik.com/fotos-premium/mesa-de-roleta-de-cassino-com-foco-seletivo-na-roda-da-roleta_102582-7049.jpg" class="h-32 w-full object-cover">
+                <div class="p-3 bg-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase italic">Roleta Imersiva</span>
+                    <span class="text-[8px] bg-green-500 text-black px-2 py-0.5 rounded-full font-bold uppercase">Ao Vivo</span>
+                </div>
+            </div>
+            </div>
+    </div>
+
+    <div id="game-screen" class="hidden fixed inset-0 bg-[#0b1120] z-50 flex flex-col">
+        <div class="p-2 glass flex justify-between items-center">
+            <button onclick="voltarLobby()" class="text-xs text-yellow-500 font-bold">⬅ VOLTAR</button>
+            <span class="text-[10px] font-black italic uppercase">Monitorando: Roleta Imersiva</span>
+            <div id="status-bot" class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+        </div>
+        
+        <div class="flex-1 bg-black relative">
+            <iframe id="game-frame" src="" class="w-full h-full border-none shadow-inner"></iframe>
+            
+            <div class="absolute bottom-4 right-4 w-48 glass p-4 rounded-2xl shadow-2xl border-yellow-500/50">
+                <p class="text-[10px] text-center text-yellow-500 font-bold mb-2 uppercase">Informar Último Nº</p>
+                <div class="grid grid-cols-6 gap-1 mb-3">
                     <script>
-                        for(let i=0; i<=36; i++) document.write(`<button onclick="analisar(${i})" class="bg-slate-900 p-2 rounded text-[10px] font-bold border border-gray-700 hover:bg-yellow-500 hover:text-black">${i}</button>`);
+                        for(let i=0; i<=36; i++) {
+                            const isG = [8,18,28].includes(i) ? 'btn-gatilho' : '';
+                            document.write(`<button onclick="analisar(${i})" class="bg-slate-900 border border-gray-700 text-[9px] p-1.5 rounded ${isG}">${i}</button>`);
+                        }
                     </script>
                 </div>
-                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase text-xs shadow-md">Ativar Robô</button>
+                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-2 bg-blue-600 rounded-lg font-bold text-[10px] uppercase transition shadow-lg">Ativar Robô</button>
             </div>
         </div>
     </div>
@@ -67,35 +99,42 @@
             const p = document.getElementById('pass').value;
             firebase.auth().signInWithEmailAndPassword(e, p).then(() => {
                 document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                carregarConfig();
-            }).catch(err => alert("Erro: " + err.message));
+                document.getElementById('lobby').classList.remove('hidden');
+            }).catch(err => alert("Acesso não autorizado ou saldo insuficiente."));
         }
 
         function cadastrar() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
             firebase.auth().createUserWithEmailAndPassword(e, p).then((cred) => {
-                db.collection('usuarios').doc(cred.user.uid).set({ email: e, data: new Date() });
-                alert("Cadastro realizado! Clique em Entrar.");
-            }).catch(err => alert(err.message));
+                db.collection('usuarios').doc(cred.user.uid).set({ email: e, data: new Date(), status: 'pendente' });
+                alert("Solicitação enviada! Aguarde liberação do administrador.");
+            });
         }
 
-        function carregarConfig() {
-            db.collection('config').doc('geral').onSnapshot((doc) => {
-                if(doc.exists) document.getElementById('game-frame').src = doc.data().link_afiliado;
+        function abrirJogo(tipo) {
+            db.collection('config').doc('geral').get().then(doc => {
+                document.getElementById('game-frame').src = doc.data().link_afiliado;
+                document.getElementById('lobby').classList.add('hidden');
+                document.getElementById('game-screen').classList.remove('hidden');
             });
+        }
+
+        function voltarLobby() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('lobby').classList.remove('hidden');
         }
 
         function toggleAuto() {
             autoStatus = !autoStatus;
-            document.getElementById('btn-auto').innerText = autoStatus ? "🔴 PARAR ROBÔ" : "🔵 ATIVAR ROBÔ";
+            document.getElementById('btn-auto').innerText = autoStatus ? "STOP MONITOR" : "ATIVAR ROBÔ";
             document.getElementById('btn-auto').classList.toggle('bg-red-600');
+            document.getElementById('status-bot').classList.toggle('bg-green-500');
         }
 
         function analisar(n) {
             if ([8, 18, 28].includes(n) && autoStatus) {
-                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Bot: RD TURBO BOT\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS (21 NÚMEROS):</b>\n1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Gestão: 1 Gale`;
+                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Mesa: Roleta Imersiva\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS (21 NÚMEROS):</b>\n1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Gestão: 1 Gale`;
                 fetch(`https://api.telegram.org/bot7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
