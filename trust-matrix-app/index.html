@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RD TURBO BOT</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -16,20 +17,19 @@
     <div class="bg-slate-800 p-8 rounded-3xl w-full max-w-sm border-2 border-yellow-500 shadow-2xl text-center">
         <h1 class="text-2xl font-black text-yellow-500 mb-6 italic uppercase">RD TURBO BOT</h1>
         
-        <input type="email" id="email" placeholder="E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-600 rounded-xl text-white">
-        <input type="password" id="pass" placeholder="Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white">
+        <input type="email" id="email" placeholder="E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none focus:border-yellow-500">
+        <input type="password" id="pass" placeholder="Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none focus:border-yellow-500">
         
-        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase shadow-lg mb-4">
+        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase shadow-lg mb-4 active:scale-95 transition">
             ENTRAR NO SISTEMA
         </button>
         
         <button onclick="cadastrar()" class="text-yellow-500 font-bold underline text-sm uppercase">
-            Criar novo acesso
+            CRIAR NOVO ACESSO
         </button>
     </div>
 
     <script>
-        // CONFIGURAÇÕES DO SEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
             authDomain: "rd-turbo-bot.firebaseapp.com",
@@ -45,20 +45,20 @@
             const p = document.getElementById('pass').value;
             firebase.auth().signInWithEmailAndPassword(e, p)
                 .then(() => { alert("Login realizado com sucesso!"); })
-                .catch(err => alert("Erro: " + err.message));
+                .catch(err => alert("Acesso inválido: Ativa o método E-mail/Senha no Firebase."));
         }
 
         function cadastrar() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if(!e || !p) return alert("Preencha os campos para criar o acesso.");
+            if(!e || !p) return alert("Preencha os campos primeiro!");
             
             firebase.auth().createUserWithEmailAndPassword(e, p)
                 .then(() => {
                     firebase.firestore().collection('usuarios').add({ email: e, data: new Date() });
-                    alert("ACESSO CRIADO! Agora você já pode clicar em ENTRAR.");
+                    alert("ACESSO CRIADO! Agora já podes clicar em ENTRAR.");
                 })
-                .catch(err => alert("Erro ao criar acesso: " + err.message));
+                .catch(err => alert("Erro: " + err.message));
         }
     </script>
 </body>
