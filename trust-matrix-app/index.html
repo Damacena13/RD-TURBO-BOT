@@ -3,38 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUST MATRIX PRO</title>
+    <title>RD TURBO BOT - LOGIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { background-color: #0b1120; font-family: 'Inter', sans-serif; }
+        .login-card { border: 1px solid #eab308; background: #111827; }
+    </style>
 </head>
-<body class="bg-[#0b1120] text-white p-2">
+<body class="text-white p-2">
     <div id="login-screen" class="fixed inset-0 bg-[#0b1120] z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-800 p-8 rounded-2xl border border-yellow-500 w-full max-w-sm space-y-6 shadow-2xl">
-            <h1 class="text-2xl font-black text-yellow-500 text-center italic uppercase">Trust Matrix</h1>
+        <div class="login-card p-8 rounded-2xl w-full max-w-sm space-y-6 shadow-2xl text-center">
+            <h1 class="text-2xl font-black text-yellow-500 italic uppercase">RD TURBO BOT</h1>
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="E-mail" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none text-white">
-                <input type="password" id="pass" placeholder="Senha" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none text-white">
-                <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase hover:bg-yellow-400 transition">Entrar</button>
+                <input type="email" id="email" placeholder="E-mail" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none">
+                <input type="password" id="pass" placeholder="Senha" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg outline-none">
+                <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase hover:bg-yellow-400 transition">ENTRAR</button>
                 <button onclick="cadastrar()" class="w-full text-xs text-gray-400 underline">Criar novo acesso</button>
             </div>
         </div>
     </div>
 
-    <div id="main-content" class="hidden max-w-6xl mx-auto space-y-4">
+    <div id="main-content" class="hidden max-w-6xl mx-auto space-y-4 pt-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2 bg-slate-900 rounded-xl overflow-hidden h-[500px] border border-gray-800 shadow-2xl">
+            <div class="md:col-span-2 bg-slate-900 rounded-xl overflow-hidden h-[500px] border border-gray-800">
                 <iframe id="game-frame" src="" width="100%" height="100%" frameborder="0"></iframe>
             </div>
-            <div class="bg-slate-800 p-5 rounded-xl border border-gray-700 text-center space-y-4">
-                <h2 class="text-yellow-500 font-black italic uppercase">Estratégia Terminal 8-18-28</h2>
+            <div class="bg-slate-800 p-5 rounded-xl border border-gray-700 text-center space-y-4 shadow-lg">
+                <h2 class="text-yellow-500 font-black italic uppercase">RD TURBO BOT - SINAIS</h2>
                 <div class="grid grid-cols-6 gap-1">
                     <script>
-                        for(let i=0; i<=36; i++) document.write(`<button onclick="analisar(${i})" class="bg-slate-900 p-2 rounded text-[10px] font-bold border border-gray-700 hover:bg-yellow-500 hover:text-black transition">${i}</button>`);
+                        for(let i=0; i<=36; i++) document.write(`<button onclick="analisar(${i})" class="bg-slate-900 p-2 rounded text-[10px] font-bold border border-gray-700 hover:bg-yellow-500 hover:text-black">${i}</button>`);
                     </script>
                 </div>
-                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase text-xs shadow-lg">Ativar Robô Automático</button>
+                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase text-xs shadow-md">Ativar Robô</button>
             </div>
         </div>
     </div>
@@ -56,10 +60,10 @@
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
             firebase.auth().signInWithEmailAndPassword(e, p).then(() => {
-                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 carregarConfig();
-            }).catch(err => alert("Acesso Negado: Verifique e-mail e senha."));
+            }).catch(err => alert("Erro: " + err.message));
         }
 
         function cadastrar() {
@@ -67,8 +71,8 @@
             const p = document.getElementById('pass').value;
             firebase.auth().createUserWithEmailAndPassword(e, p).then((cred) => {
                 db.collection('usuarios').doc(cred.user.uid).set({ email: e, data: new Date() });
-                alert("Cadastro realizado! Agora clique em Entrar.");
-            }).catch(err => alert("Erro ao cadastrar: " + err.message));
+                alert("Cadastro realizado! Clique em Entrar.");
+            }).catch(err => alert(err.message));
         }
 
         function carregarConfig() {
@@ -79,13 +83,13 @@
 
         function toggleAuto() {
             autoStatus = !autoStatus;
-            document.getElementById('btn-auto').innerText = autoStatus ? "🔴 PARAR MONITORAMENTO" : "🔵 ATIVAR ROBÔ AUTOMÁTICO";
+            document.getElementById('btn-auto').innerText = autoStatus ? "🔴 PARAR ROBÔ" : "🔵 ATIVAR ROBÔ";
             document.getElementById('btn-auto').classList.toggle('bg-red-600');
         }
 
         function analisar(n) {
             if ([8, 18, 28].includes(n) && autoStatus) {
-                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Roleta: Pragmatic/Evolution\n🔢 Gatilho: Terminal ${n % 10} (${n})\n\n✅ <b>ALVOS (21 NÚMEROS):</b>\n1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Fazer até um Gale`;
+                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Bot: RD TURBO BOT\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS (21 NÚMEROS):</b>\n1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Gestão: 1 Gale`;
                 fetch(`https://api.telegram.org/bot7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
