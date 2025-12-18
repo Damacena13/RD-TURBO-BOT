@@ -3,91 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUST MATRIX - RD TURBO</title>
-    <link rel="manifest" href="manifest.json">
+    <title>TRUST MATRIX PRO - GESTÃO & AUTOMAÇÃO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
-        .status-box { border: 2px solid #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
-        .hidden { display: none; }
+        body { background-color: #0b0f1a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .panel-glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .input-dark { background: #0f172a; border: 1px solid #334155; color: white; padding: 10px; border-radius: 8px; }
+        .btn-gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: black; font-weight: bold; }
     </style>
 </head>
 <body class="p-4">
 
-    <div id="login-screen" class="max-w-md mx-auto mt-20 p-6 bg-gray-800 rounded-2xl border border-yellow-500 shadow-2xl">
-        <div class="text-center mb-6">
-            <img src="icon.png" class="w-20 h-20 mx-auto rounded-full border-2 border-yellow-500 mb-2">
-            <h2 class="text-2xl font-bold text-yellow-500 uppercase">Área Restrita</h2>
-            <p class="text-xs text-gray-400">Insira sua licença para continuar</p>
-        </div>
-        <input type="password" id="pass-input" placeholder="Chave de Acesso" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 text-center text-xl mb-4 text-white focus:outline-none focus:border-yellow-500">
-        <button onclick="verificarSenha()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-700 rounded-xl font-bold text-white transition-all uppercase">Acessar Painel</button>
-        <p id="error-msg" class="text-red-500 text-center text-sm mt-4 hidden">Chave inválida!</p>
-    </div>
-
-    <div id="main-panel" class="max-w-md mx-auto space-y-6 hidden">
-        <div class="text-center">
-            <img src="icon.png" alt="Logo" class="w-20 h-20 mx-auto mb-2 rounded-full border-2 border-yellow-500">
-            <h1 class="text-3xl font-bold text-yellow-500">TRUST MATRIX</h1>
-            <p class="text-xs text-gray-400 uppercase tracking-widest">Painel Operativo Ativo</p>
+    <div id="main-panel" class="max-w-md mx-auto space-y-4">
+        <div class="text-center py-4">
+            <h1 class="text-2xl font-black text-yellow-500 tracking-tighter">TRUST MATRIX <span class="text-white text-xs bg-red-600 px-2 rounded">PRO</span></h1>
+            <p class="text-[10px] text-gray-500 uppercase">Gestão de Banca & Automação de Sinais</p>
         </div>
 
-        <div class="p-6 bg-gray-800 rounded-2xl status-box">
-            <div id="display-status" class="bg-gray-900 p-4 rounded-lg text-center border border-gray-700">
-                <p id="status-text" class="text-sm text-gray-400">Monitorando Roleta...</p>
-                <p class="text-4xl font-mono mt-2 text-yellow-500" id="last-number">--</p>
-            </div>
-            <div class="mt-6 space-y-3">
-                <div class="flex justify-between text-sm border-b border-gray-700 pb-1">
-                    <span class="text-gray-400">Estratégia:</span>
-                    <span class="text-yellow-500 font-bold">Terminal 8</span>
+        <div class="panel-glass p-4 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-sm font-bold border-b border-gray-700 pb-2 text-yellow-500">💰 CONFIGURAÇÃO DE BANCA</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase">Banca Inicial</label>
+                    <input type="number" id="banca-inicial" value="100" class="input-dark w-full" oninput="calcularGestao()">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase">Banca Atual</label>
+                    <input type="number" id="banca-atual" value="100" class="input-dark w-full" oninput="calcularGestao()">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase">Stop Green (Meta)</label>
+                    <input type="number" id="stop-green" value="50" class="input-dark w-full text-green-400">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-400 uppercase">Stop Loss (Red)</label>
+                    <input type="number" id="stop-loss" value="30" class="input-dark w-full text-red-400">
                 </div>
             </div>
+
+            <div id="gestao-status" class="bg-black/40 p-3 rounded-lg text-center">
+                <p class="text-xs text-gray-400">Resultado Atual</p>
+                <p id="lucro-valor" class="text-xl font-bold text-white">R$ 0,00</p>
+            </div>
         </div>
-        <button id="btn-start" onclick="ativarSinais()" class="w-full py-4 bg-blue-600 rounded-xl font-bold shadow-lg text-white uppercase">Sistema Operando</button>
+
+        <div class="panel-glass p-4 rounded-2xl">
+            <h3 class="text-sm font-bold border-b border-gray-700 pb-2 text-blue-500 mb-4 text-center">🤖 ROBÔ DE AUTOMAÇÃO</h3>
+            <button id="btn-auto" onclick="toggleAutomacao()" class="w-full py-4 rounded-xl font-black uppercase transition-all shadow-lg bg-blue-600">
+                Ativar Tudo (Automático)
+            </button>
+            <p id="auto-status" class="text-[10px] text-center mt-2 text-gray-500 uppercase tracking-widest">Sistema em Espera</p>
+        </div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES ATUALIZADAS
-        const SENHA_MESTRA = "123456"; 
         const CONFIG = {
-            TOKEN: "7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c", // Seu novo token
-            CHAT_ID: "-1003694254792", // Seu Chat ID confirmado
-            GATILHOS: [8, 18, 28]
+            TOKEN: "7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c",
+            CHAT_ID: "-1003694254792"
         };
 
-        function verificarSenha() {
-            const digitado = document.getElementById('pass-input').value;
-            if (digitado === SENHA_MESTRA) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-panel').classList.remove('hidden');
-                localStorage.setItem('auth_trust', 'true');
-            } else {
-                document.getElementById('error-msg').classList.remove('hidden');
-            }
-        }
+        let automacaoAtiva = false;
 
-        if(localStorage.getItem('auth_trust') === 'true') {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-panel').classList.remove('hidden');
+        function calcularGestao() {
+            const inicial = parseFloat(document.getElementById('banca-inicial').value) || 0;
+            const atual = parseFloat(document.getElementById('banca-atual').value) || 0;
+            const lucro = atual - inicial;
+            const display = document.getElementById('lucro-valor');
+
+            display.innerText = `R$ ${lucro.toFixed(2)}`;
+            display.className = lucro >= 0 ? "text-xl font-bold text-green-500" : "text-xl font-bold text-red-500";
         }
 
         async function notify(msg) {
             const url = `https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`;
-            try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" })
-                });
-            } catch (e) { console.error("Erro no Telegram"); }
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" })
+            });
         }
 
-        function ativarSinais() {
-            notify("🚀 <b>TRUST MATRIX</b>\nSistema iniciado com o novo bot!");
-            alert("Sinal de ativação enviado para o Telegram!");
+        function toggleAutomacao() {
+            const btn = document.getElementById('btn-auto');
+            const status = document.getElementById('auto-status');
+            
+            automacaoAtiva = !automacaoAtiva;
+
+            if (automacaoAtiva) {
+                btn.innerText = "Parar Automação";
+                btn.className = "w-full py-4 rounded-xl font-black uppercase transition-all shadow-lg bg-red-600";
+                status.innerText = "📡 Buscando Oportunidades...";
+                status.classList.add("animate-pulse", "text-blue-400");
+                notify("🤖 <b>AUTOMAÇÃO ATIVADA</b>\nMonitorando roleta com gestão de banca...");
+            } else {
+                btn.innerText = "Ativar Tudo (Automático)";
+                btn.className = "w-full py-4 rounded-xl font-black uppercase transition-all shadow-lg bg-blue-600";
+                status.innerText = "Sistema em Espera";
+                status.classList.remove("animate-pulse", "text-blue-400");
+                notify("⚠️ <b>AUTOMAÇÃO PAUSADA</b>\nO robô parou de enviar sinais.");
+            }
         }
     </script>
 </body>
 </html>
-
