@@ -17,12 +17,12 @@
     <div id="login-screen" class="max-w-md mx-auto mt-20 p-6 bg-gray-800 rounded-2xl border border-yellow-500 shadow-2xl">
         <div class="text-center mb-6">
             <img src="icon.png" class="w-20 h-20 mx-auto rounded-full border-2 border-yellow-500 mb-2">
-            <h2 class="text-2xl font-bold text-yellow-500">ÁREA RESTRITA</h2>
+            <h2 class="text-2xl font-bold text-yellow-500 uppercase">Área Restrita</h2>
             <p class="text-xs text-gray-400">Insira sua licença para continuar</p>
         </div>
-        <input type="password" id="pass-input" placeholder="Chave de Acesso" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 text-center text-xl mb-4 focus:outline-none focus:border-yellow-500">
-        <button onclick="verificarSenha()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-700 rounded-xl font-bold text-white transition-all">ACESSAR PAINEL</button>
-        <p id="error-msg" class="text-red-500 text-center text-sm mt-4 hidden">Chave inválida. Tente novamente.</p>
+        <input type="password" id="pass-input" placeholder="Chave de Acesso" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 text-center text-xl mb-4 text-white focus:outline-none focus:border-yellow-500">
+        <button onclick="verificarSenha()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-700 rounded-xl font-bold text-white transition-all uppercase">Acessar Painel</button>
+        <p id="error-msg" class="text-red-500 text-center text-sm mt-4 hidden">Chave inválida!</p>
     </div>
 
     <div id="main-panel" class="max-w-md mx-auto space-y-6 hidden">
@@ -44,18 +44,16 @@
                 </div>
             </div>
         </div>
-        <button id="btn-start" onclick="ativarSinais()" class="w-full py-4 bg-green-600 rounded-xl font-bold shadow-lg text-white">INICIAR MONITORAMENTO</button>
+        <button id="btn-start" onclick="ativarSinais()" class="w-full py-4 bg-blue-600 rounded-xl font-bold shadow-lg text-white uppercase">Sistema Operando</button>
     </div>
 
     <script>
-        // DEFINA SUA SENHA AQUI
+        // CONFIGURAÇÕES ATUALIZADAS
         const SENHA_MESTRA = "123456"; 
-
         const CONFIG = {
-            TOKEN: "8250301882:AAEScg1iUQ2pJuGBxTeGmol2UmJ9B6lxFvk",
-            CHAT_ID: "-1003406572733",
-            GATILHOS: [8, 18, 28],
-            ALVOS: [1, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 32, 33, 34]
+            TOKEN: "7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c", // Seu novo token
+            CHAT_ID: "-1003406572733", // Seu Chat ID confirmado
+            GATILHOS: [8, 18, 28]
         };
 
         function verificarSenha() {
@@ -63,19 +61,17 @@
             if (digitado === SENHA_MESTRA) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-panel').classList.remove('hidden');
-                localStorage.setItem('auth_trust', 'true'); // Salva login no celular
+                localStorage.setItem('auth_trust', 'true');
             } else {
                 document.getElementById('error-msg').classList.remove('hidden');
             }
         }
 
-        // Verifica se já estava logado antes
         if(localStorage.getItem('auth_trust') === 'true') {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-panel').classList.remove('hidden');
         }
 
-        // Lógica de monitoramento (igual ao anterior)
         async function notify(msg) {
             const url = `https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`;
             try {
@@ -84,19 +80,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" })
                 });
-            } catch (e) { console.error("Erro Telegram"); }
+            } catch (e) { console.error("Erro no Telegram"); }
         }
 
         function ativarSinais() {
-            notify("🚀 <b>TRUST MATRIX</b>\nSistema iniciado!");
-            document.getElementById('btn-start').innerText = "SISTEMA OPERANDO";
-            document.getElementById('btn-start').disabled = true;
-            document.getElementById('btn-start').classList.replace('bg-green-600', 'bg-blue-600');
-            
-            setInterval(() => {
-                // Aqui entraria a leitura da tela via extensão ou API
-                console.log("Monitorando...");
-            }, 1000);
+            notify("🚀 <b>TRUST MATRIX</b>\nSistema iniciado com o novo bot!");
+            alert("Sinal de ativação enviado para o Telegram!");
         }
     </script>
 </body>
