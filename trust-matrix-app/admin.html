@@ -2,38 +2,60 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>TRUST MATRIX - ADMIN</title>
+    <title>ADMIN MASTER - TRUST MATRIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body class="bg-slate-900 text-white p-6">
-    <div class="max-w-md mx-auto bg-slate-800 p-6 rounded-xl border-2 border-yellow-500 shadow-2xl">
-        <h1 class="text-2xl font-black text-yellow-500 mb-6 text-center italic">PAINEL DO DONO</h1>
-        
-        <div class="space-y-6">
-            <div>
-                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Link de Afiliado Ativo</label>
-                <input type="text" id="link-afiliado" placeholder="https://seu-link-aqui.com" class="w-full p-3 bg-slate-900 border border-gray-700 rounded-lg mt-2 text-sm focus:ring-2 focus:ring-yellow-500 outline-none">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <h1 class="text-2xl font-black text-yellow-500 uppercase italic">Painel de Controle RD TURBO</h1>
+
+        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700">
+            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase">🔗 Link de Afiliado para Clientes</h2>
+            <div class="flex gap-2">
+                <input type="text" id="link-input" placeholder="Cole o link da roleta aqui..." class="flex-1 p-3 bg-slate-900 border border-gray-700 rounded text-sm outline-none">
+                <button onclick="salvarLink()" class="bg-yellow-500 text-black px-8 py-3 rounded font-black uppercase text-xs">Atualizar</button>
             </div>
-            
-            <button onclick="atualizarSistema()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-xl uppercase transition-all shadow-lg active:scale-95">
-                Atualizar App dos Clientes
-            </button>
-            
-            <p id="msg-sucesso" class="text-center text-green-400 text-xs font-bold hidden">✅ LINK ATUALIZADO COM SUCESSO!</p>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700">
+            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">👥 Lista de Usuários (E-mails)</h2>
+            <div id="user-list" class="space-y-2 max-h-60 overflow-y-auto">
+                <p class="text-gray-500 italic text-sm">Carregando usuários...</p>
+            </div>
         </div>
     </div>
 
     <script>
-        function atualizarSistema() {
-            const link = document.getElementById('link-afiliado').value;
-            if(!link) { alert("Cole um link válido!"); return; }
-            
-            // Salva o link no "cérebro" do navegador para o index.html ler
-            localStorage.setItem('url_afiliado_trust', link);
-            
-            document.getElementById('msg-sucesso').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('msg-sucesso').classList.add('hidden'); }, 3000);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
+            authDomain: "rd-turbo-bot.firebaseapp.com",
+            projectId: "rd-turbo-bot",
+            databaseURL: "https://rd-turbo-bot-default-rtdb.firebaseio.com",
+            storageBucket: "rd-turbo-bot.firebasestorage.app",
+            messagingSenderId: "681502711638",
+            appId: "1:681502711638:web:0b43afb70cae48bd1dc0f7"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function salvarLink() {
+            const url = document.getElementById('link-input').value;
+            firebase.database().ref('config/').update({ link: url })
+                .then(() => alert("Link atualizado!"));
         }
+
+        // Busca usuários cadastrados
+        firebase.database().ref('usuarios').on('value', (s) => {
+            const list = document.getElementById('user-list');
+            list.innerHTML = "";
+            s.forEach((user) => {
+                list.innerHTML += `<div class="p-3 bg-slate-900 border border-gray-800 rounded flex justify-between items-center">
+                    <span class="text-sm font-bold text-blue-400">${user.val().email}</span>
+                    <span class="text-[10px] bg-green-900 text-green-300 px-2 py-1 rounded">ATIVO</span>
+                </div>`;
+            });
+        });
     </script>
 </body>
 </html>
