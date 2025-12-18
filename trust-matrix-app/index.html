@@ -12,21 +12,23 @@
 <body class="bg-[#0b1120] text-white">
 
     <div id="login-screen" class="fixed inset-0 bg-[#0b1120] z-[100] flex items-center justify-center p-4">
-        <div class="bg-slate-800 p-8 rounded-3xl w-full max-w-sm border border-yellow-500/30 text-center">
-            <h1 class="text-2xl font-black text-yellow-500 mb-6 uppercase italic">RD TURBO BOT</h1>
-            <input type="email" id="email" placeholder="E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-700 rounded-xl outline-none">
-            <input type="password" id="pass" placeholder="Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-700 rounded-xl outline-none">
-            <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase">Entrar no Sistema</button>
+        <div class="bg-slate-800 p-8 rounded-3xl w-full max-w-sm border border-yellow-500/30 text-center shadow-2xl">
+            <h1 class="text-2xl font-black text-yellow-500 mb-6 uppercase italic tracking-tighter">RD TURBO BOT</h1>
+            <input type="email" id="email" placeholder="E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-700 rounded-xl outline-none focus:border-yellow-500">
+            <input type="password" id="pass" placeholder="Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-700 rounded-xl outline-none focus:border-yellow-500">
+            <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase shadow-lg active:scale-95 transition">Entrar no Sistema</button>
             <button onclick="cadastrar()" class="mt-4 text-xs text-gray-500 underline">Criar novo acesso</button>
         </div>
     </div>
 
-    <div id="main-content" class="hidden p-4">
+    <div id="main-content" class="hidden p-4 space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2 bg-black rounded-3xl overflow-hidden h-[500px] border border-gray-800">
-                <iframe id="game-frame" src="" class="w-full h-full border-none"></iframe>
+            <div class="md:col-span-2 bg-black rounded-3xl overflow-hidden h-[500px] border border-gray-800 shadow-2xl relative">
+                <iframe id="game-frame" src="" class="w-full h-full border-none shadow-inner" loading="lazy"></iframe>
             </div>
-            <div class="bg-slate-800 p-5 rounded-3xl border border-gray-700 text-center space-y-4">
+            
+            <div class="bg-slate-800 p-5 rounded-3xl border border-gray-700 text-center space-y-4 shadow-xl">
+                <p class="text-[10px] text-gray-400 uppercase font-bold">Informar Último Número</p>
                 <div class="grid grid-cols-6 gap-1">
                     <script>
                         for(let i=0; i<=36; i++) {
@@ -35,12 +37,13 @@
                         }
                     </script>
                 </div>
-                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase">Ativar Robô</button>
+                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase shadow-md active:scale-95 transition">Ativar Robô</button>
             </div>
         </div>
     </div>
 
     <script>
+        // Credenciais do seu Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
             authDomain: "rd-turbo-bot.firebaseapp.com",
@@ -59,32 +62,33 @@
             firebase.auth().signInWithEmailAndPassword(e, p).then(() => {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
-                // Carrega o link do banco em tempo real
+                // Sincroniza o link da roleta em tempo real
                 db.collection('config').doc('geral').onSnapshot(doc => {
                     if(doc.exists) document.getElementById('game-frame').src = doc.data().link_afiliado;
                 });
-            }).catch(() => alert("Acesso inválido. Verifique se ativou E-mail/Senha no Firebase."));
+            }).catch(() => alert("Acesso inválido. Verifique se o método E-mail/Senha está ativo no Firebase."));
         }
 
         function cadastrar() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
+            if(!e || !p) return alert("Preencha e-mail e senha!");
             firebase.auth().createUserWithEmailAndPassword(e, p).then((cred) => {
                 db.collection('usuarios').doc(cred.user.uid).set({ email: e, data: new Date() });
-                alert("Cadastro feito! Agora clique em Entrar.");
+                alert("Cadastro realizado! Clique em Entrar no Sistema.");
             }).catch(err => alert(err.message));
         }
 
         function toggleAuto() {
             autoStatus = !autoStatus;
-            document.getElementById('btn-auto').innerText = autoStatus ? "STOP MONITOR" : "ATIVAR ROBÔ";
-            document.getElementById('btn-auto').classList.toggle('bg-red-600');
+            const btn = document.getElementById('btn-auto');
+            btn.innerText = autoStatus ? "STOP MONITOR" : "ATIVAR ROBÔ";
+            btn.classList.toggle('bg-red-600');
         }
 
         function analisar(n) {
             if ([8, 18, 28].includes(n) && autoStatus) {
-                // Estratégia
-                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS:</b> 1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n🛡️ 1 Gale`;
+                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Bot: RD TURBO BOT\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS (21 NÚMEROS):</b>\n1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n🛡️ 1 Gale`;
                 fetch(`https://api.telegram.org/bot7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
