@@ -5,24 +5,24 @@
     <title>ADMIN MASTER - TRUST MATRIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-900 text-white p-6">
     <div class="max-w-4xl mx-auto space-y-6">
-        <h1 class="text-2xl font-black text-yellow-500 uppercase italic">Painel de Controle RD TURBO</h1>
+        <h1 class="text-3xl font-black text-yellow-500 uppercase italic text-center">Painel de Controle RD TURBO</h1>
 
-        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700">
-            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase">🔗 Link de Afiliado para Clientes</h2>
+        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700 shadow-2xl">
+            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Configurar Link de Afiliado</h2>
             <div class="flex gap-2">
-                <input type="text" id="link-input" placeholder="Cole o link da roleta aqui..." class="flex-1 p-3 bg-slate-900 border border-gray-700 rounded text-sm outline-none">
-                <button onclick="salvarLink()" class="bg-yellow-500 text-black px-8 py-3 rounded font-black uppercase text-xs">Atualizar</button>
+                <input type="text" id="link-input" placeholder="Cole o link da roleta aqui..." class="flex-1 p-3 bg-slate-900 border border-gray-700 rounded text-sm outline-none text-white">
+                <button onclick="salvarLink()" class="bg-yellow-500 text-black px-8 py-3 rounded font-black uppercase text-xs hover:bg-yellow-400 transition">Salvar Link</button>
             </div>
         </div>
 
-        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700">
-            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">👥 Lista de Usuários (E-mails)</h2>
-            <div id="user-list" class="space-y-2 max-h-60 overflow-y-auto">
-                <p class="text-gray-500 italic text-sm">Carregando usuários...</p>
+        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700 shadow-2xl">
+            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">Gestão de Clientes</h2>
+            <div id="user-list" class="space-y-2">
+                <p class="text-gray-500 text-sm italic">Carregando usuários do Firestore...</p>
             </div>
         </div>
     </div>
@@ -32,27 +32,32 @@
             apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
             authDomain: "rd-turbo-bot.firebaseapp.com",
             projectId: "rd-turbo-bot",
-            databaseURL: "https://rd-turbo-bot-default-rtdb.firebaseio.com",
             storageBucket: "rd-turbo-bot.firebasestorage.app",
             messagingSenderId: "681502711638",
             appId: "1:681502711638:web:0b43afb70cae48bd1dc0f7"
         };
         firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         function salvarLink() {
             const url = document.getElementById('link-input').value;
-            firebase.database().ref('config/').update({ link: url })
-                .then(() => alert("Link atualizado!"));
+            if(!url) return alert("Insira um link válido!");
+            db.collection('config').doc('geral').set({ link_afiliado: url })
+                .then(() => alert("Link de Afiliado atualizado com sucesso!"));
         }
 
-        // Busca usuários cadastrados
-        firebase.database().ref('usuarios').on('value', (s) => {
+        // Monitora usuários no Firestore em tempo real
+        db.collection('usuarios').orderBy('data', 'desc').onSnapshot((snapshot) => {
             const list = document.getElementById('user-list');
             list.innerHTML = "";
-            s.forEach((user) => {
-                list.innerHTML += `<div class="p-3 bg-slate-900 border border-gray-800 rounded flex justify-between items-center">
-                    <span class="text-sm font-bold text-blue-400">${user.val().email}</span>
-                    <span class="text-[10px] bg-green-900 text-green-300 px-2 py-1 rounded">ATIVO</span>
+            snapshot.forEach((doc) => {
+                const userData = doc.data();
+                list.innerHTML += `<div class="p-4 bg-slate-900 border border-gray-800 rounded-lg flex justify-between items-center shadow-md">
+                    <div>
+                        <p class="text-sm font-bold text-blue-400">${userData.email}</p>
+                        <p class="text-[9px] text-gray-500 uppercase">Cadastrado em: ${userData.data.toDate().toLocaleDateString()}</p>
+                    </div>
+                    <span class="text-[10px] bg-green-900 text-green-300 border border-green-500 px-3 py-1 rounded-full font-bold">ATIVO</span>
                 </div>`;
             });
         });
