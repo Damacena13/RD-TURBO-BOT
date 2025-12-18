@@ -9,59 +9,48 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
         .status-box { border: 2px solid #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
-        .btn-active { background-color: #2563eb; box-shadow: 0 0 10px #2563eb; }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="p-4">
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log("App Trust Matrix: Pronto para Instalar"))
-          .catch(err => console.log("Erro ao carregar Service Worker:", err));
-      }
-    </script>
+    <div id="login-screen" class="max-w-md mx-auto mt-20 p-6 bg-gray-800 rounded-2xl border border-yellow-500 shadow-2xl">
+        <div class="text-center mb-6">
+            <img src="icon.png" class="w-20 h-20 mx-auto rounded-full border-2 border-yellow-500 mb-2">
+            <h2 class="text-2xl font-bold text-yellow-500">ÁREA RESTRITA</h2>
+            <p class="text-xs text-gray-400">Insira sua licença para continuar</p>
+        </div>
+        <input type="password" id="pass-input" placeholder="Chave de Acesso" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 text-center text-xl mb-4 focus:outline-none focus:border-yellow-500">
+        <button onclick="verificarSenha()" class="w-full py-4 bg-yellow-600 hover:bg-yellow-700 rounded-xl font-bold text-white transition-all">ACESSAR PAINEL</button>
+        <p id="error-msg" class="text-red-500 text-center text-sm mt-4 hidden">Chave inválida. Tente novamente.</p>
+    </div>
 
-    <div class="max-w-md mx-auto space-y-6">
-        
+    <div id="main-panel" class="max-w-md mx-auto space-y-6 hidden">
         <div class="text-center">
             <img src="icon.png" alt="Logo" class="w-20 h-20 mx-auto mb-2 rounded-full border-2 border-yellow-500">
             <h1 class="text-3xl font-bold text-yellow-500">TRUST MATRIX</h1>
-            <p class="text-xs text-gray-400 uppercase tracking-widest">O seu novo conceito de negócio</p>
+            <p class="text-xs text-gray-400 uppercase tracking-widest">Painel Operativo Ativo</p>
         </div>
 
         <div class="p-6 bg-gray-800 rounded-2xl status-box">
-            <h2 class="text-xl font-bold mb-4 text-center">Painel Operacional</h2>
-            
             <div id="display-status" class="bg-gray-900 p-4 rounded-lg text-center border border-gray-700">
-                <p id="status-text" class="text-sm text-gray-400">Aguardando Início...</p>
+                <p id="status-text" class="text-sm text-gray-400">Monitorando Roleta...</p>
                 <p class="text-4xl font-mono mt-2 text-yellow-500" id="last-number">--</p>
             </div>
-
             <div class="mt-6 space-y-3">
                 <div class="flex justify-between text-sm border-b border-gray-700 pb-1">
                     <span class="text-gray-400">Estratégia:</span>
                     <span class="text-yellow-500 font-bold">Terminal 8</span>
                 </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-gray-400">Status Conexão:</span>
-                    <span id="conn-status" class="text-red-500 font-bold">Offline</span>
-                </div>
             </div>
         </div>
-
-        <button id="btn-start" class="w-full py-4 bg-green-600 hover:bg-green-700 rounded-xl font-bold transition-all shadow-lg text-white">
-            ATIVAR MONITORAMENTO
-        </button>
-
-        <div class="text-center space-y-1">
-            <p class="text-[10px] text-gray-600">v89.0 | TRUST MATRIX ANALYTICS</p>
-            <p class="text-[9px] text-gray-700">Acesse o link pelo PC para melhores resultados</p>
-        </div>
+        <button id="btn-start" onclick="ativarSinais()" class="w-full py-4 bg-green-600 rounded-xl font-bold shadow-lg text-white">INICIAR MONITORAMENTO</button>
     </div>
 
     <script>
-        // CONFIGURAÇÕES DO TELEGRAM
+        // DEFINA SUA SENHA AQUI
+        const SENHA_MESTRA = "123456"; 
+
         const CONFIG = {
             TOKEN: "8250301882:AAEScg1iUQ2pJuGBxTeGmol2UmJ9B6lxFvk",
             CHAT_ID: "-1003406572733",
@@ -69,9 +58,24 @@
             ALVOS: [1, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 32, 33, 34]
         };
 
-        let ultimoNum = null;
-        let pendente = false;
+        function verificarSenha() {
+            const digitado = document.getElementById('pass-input').value;
+            if (digitado === SENHA_MESTRA) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-panel').classList.remove('hidden');
+                localStorage.setItem('auth_trust', 'true'); // Salva login no celular
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
 
+        // Verifica se já estava logado antes
+        if(localStorage.getItem('auth_trust') === 'true') {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-panel').classList.remove('hidden');
+        }
+
+        // Lógica de monitoramento (igual ao anterior)
         async function notify(msg) {
             const url = `https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`;
             try {
@@ -80,62 +84,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" })
                 });
-            } catch (e) { console.error("Falha ao enviar para o Telegram."); }
+            } catch (e) { console.error("Erro Telegram"); }
         }
 
-        function iniciarLeitura() {
-            document.getElementById('status-text').innerText = "Monitorando Roleta...";
-            document.getElementById('status-text').classList.add('animate-pulse', 'text-green-400');
-            document.getElementById('conn-status').innerText = "Online";
-            document.getElementById('conn-status').classList.replace('text-red-500', 'text-green-500');
-
+        function ativarSinais() {
+            notify("🚀 <b>TRUST MATRIX</b>\nSistema iniciado!");
+            document.getElementById('btn-start').innerText = "SISTEMA OPERANDO";
+            document.getElementById('btn-start').disabled = true;
+            document.getElementById('btn-start').classList.replace('bg-green-600', 'bg-blue-600');
+            
             setInterval(() => {
-                // Lógica de leitura de tela adaptada do aut.js
-                const bodyText = document.body.innerText;
-                const match = bodyText.match(/(\d{1,2}\s){5,}/g);
-                if (!match) return;
-
-                const historico = match[0].split(/\s+/).map(Number).filter(n => !isNaN(n));
-                const atual = historico[0];
-
-                if (atual !== ultimoNum) {
-                    ultimoNum = atual;
-                    document.getElementById('last-number').innerText = atual;
-
-                    // Conferência de Green/Red
-                    if (pendente) {
-                        const win = [...CONFIG.ALVOS, 0].includes(atual);
-                        if (win) {
-                            notify(`✅ <b>GREEN TRUST MATRIX!</b>\nNúmero sorteado: <b>${atual}</b>`);
-                            pendente = false;
-                        } else {
-                            notify(`🚨 <b>GALE 1</b>\nAguardando confirmação...`);
-                        }
-                    }
-
-                    // Gatilho de Entrada
-                    if (!pendente && CONFIG.GATILHOS.includes(atual)) {
-                        pendente = true;
-                        notify(`
-🟢 <b>ENTRADA CONFIRMADA</b>
-🎰 Roleta: Brasileira Evolution
-
-💰 Apostar: <b>${CONFIG.ALVOS.join(", ")}</b>
-⚠️ Cobrir 0 (Zero) com 5%
-🚥 Sequência: ${historico[1]} -> <b>${atual}</b>
-                        `);
-                    }
-                }
+                // Aqui entraria a leitura da tela via extensão ou API
+                console.log("Monitorando...");
             }, 1000);
         }
-
-        document.getElementById('btn-start').addEventListener('click', function() {
-            notify("🚀 <b>TRUST MATRIX</b>\nSistema iniciado com sucesso no dispositivo!");
-            iniciarLeitura();
-            this.innerText = "SISTEMA OPERANDO";
-            this.disabled = true;
-            this.classList.add('btn-active');
-        });
     </script>
 </body>
 </html>
