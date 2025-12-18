@@ -2,27 +2,29 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN - RD TURBO BOT</title>
+    <title>MASTER ADMIN - RD TURBO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-900 text-white p-6">
-    <div class="max-w-4xl mx-auto space-y-6 text-center">
-        <img src="icon.png" alt="Logo" class="w-20 h-20 mx-auto mb-2 object-contain">
-        <h1 class="text-3xl font-black text-yellow-500 uppercase italic">ADMIN RD TURBO BOT</h1>
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="flex items-center gap-4">
+            <img src="icon.jpg" class="w-16 h-16 rounded-full border-2 border-yellow-500">
+            <h1 class="text-2xl font-black text-yellow-500 uppercase italic">Central de Comando RD TURBO</h1>
+        </div>
 
-        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700 shadow-xl text-left">
-            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase">Link de Afiliado (Roleta)</h2>
+        <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
+            <h2 class="text-xs font-bold text-gray-400 mb-2 uppercase">🔗 Gerenciar Link da Roleta (Afiliado)</h2>
             <div class="flex gap-2">
                 <input type="text" id="link-input" placeholder="Cole o link da roleta aqui..." class="flex-1 p-3 bg-slate-900 border border-gray-700 rounded text-sm outline-none">
-                <button onclick="salvarLink()" class="bg-yellow-500 text-black px-8 py-3 rounded font-black uppercase text-xs hover:bg-yellow-400">Salvar</button>
+                <button onclick="salvarLink()" class="bg-yellow-500 text-black px-8 py-3 rounded font-black uppercase text-xs hover:bg-yellow-400">Salvar Sistema</button>
             </div>
         </div>
 
-        <div class="bg-slate-800 p-6 rounded-xl border border-gray-700 shadow-xl">
-            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">Usuários Cadastrados</h2>
-            <div id="user-list" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-left">
+        <div class="bg-slate-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
+            <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase text-center">Gestão de Clientes e Acessos</h2>
+            <div id="user-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 </div>
         </div>
     </div>
@@ -41,21 +43,33 @@
 
         function salvarLink() {
             const url = document.getElementById('link-input').value;
-            db.collection('config').doc('geral').set({ link_afiliado: url })
-                .then(() => alert("Link RD TURBO BOT atualizado!"));
+            db.collection('config').doc('geral').set({ link_afiliado: url }).then(() => alert("Aplicativo atualizado!"));
         }
 
         db.collection('usuarios').orderBy('data', 'desc').onSnapshot((snapshot) => {
             const list = document.getElementById('user-list');
             list.innerHTML = "";
             snapshot.forEach((doc) => {
+                const u = doc.data();
                 list.innerHTML += `
-                    <div class="p-3 bg-slate-900 border border-gray-800 rounded flex justify-between items-center">
-                        <span class="text-xs font-bold text-blue-400">${doc.data().email}</span>
-                        <span class="text-[8px] bg-green-900 text-green-300 px-2 py-1 rounded-full">Ativo</span>
+                    <div class="p-4 bg-slate-900 border border-gray-800 rounded-xl flex justify-between items-center shadow-md">
+                        <div>
+                            <p class="text-xs font-bold text-blue-400">${u.email}</p>
+                            <p class="text-[9px] text-gray-500 uppercase">Cadastro: ${u.data.toDate().toLocaleDateString()}</p>
+                        </div>
+                        <div class="flex gap-2">
+                             <span class="text-[8px] bg-green-900 text-green-300 px-2 py-1 rounded-full uppercase font-bold">Ativo</span>
+                             <button onclick="remover('${doc.id}')" class="text-[10px] text-red-500 hover:underline uppercase">Bloquear</button>
+                        </div>
                     </div>`;
             });
         });
+
+        function remover(id) {
+            if(confirm("Deseja bloquear este cliente?")) {
+                db.collection('usuarios').doc(id).delete();
+            }
+        }
     </script>
 </body>
 </html>
