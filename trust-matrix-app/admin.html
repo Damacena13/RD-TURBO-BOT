@@ -2,32 +2,30 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>CENTRAL DE COMANDO RD TURBO</title>
+    <title>CENTRAL MASTER - RD TURBO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-[#0b1120] text-white p-6">
-    <div class="max-w-4xl mx-auto space-y-6">
-        <header class="flex items-center gap-4 bg-slate-800 p-6 rounded-3xl border border-yellow-500/30">
-            <img src="icon.jpg" class="w-16 h-16 rounded-full border-2 border-yellow-500">
+<body class="bg-[#0b1120] text-white p-6 font-sans">
+    <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex items-center gap-6 bg-slate-800/50 p-8 rounded-[40px] border border-yellow-500/20 shadow-2xl">
+            <img src="icon.jpg" class="w-20 h-20 rounded-full border-2 border-yellow-500 shadow-lg object-cover">
             <div>
-                <h1 class="text-2xl font-black text-yellow-500 uppercase italic">Central Master</h1>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Painel de Controle RD TURBO BOT</p>
+                <h1 class="text-3xl font-black text-yellow-500 uppercase italic tracking-tighter">Central Master</h1>
+                <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em]">Painel de Controle RD TURBO BOT</p>
             </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-800 p-6 rounded-3xl border border-gray-700 shadow-xl">
-                <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">🔗 Link Ativo da Roleta</h2>
-                <div class="space-y-4">
-                    <input type="text" id="link-input" placeholder="Cole o seu link de afiliado aqui..." class="w-full p-4 bg-slate-900 border border-gray-700 rounded-xl outline-none text-xs focus:border-yellow-500">
-                    <button onclick="salvarLink()" class="w-full bg-yellow-500 text-black px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-yellow-400">Salvar Sistema</button>
-                </div>
+            <div class="bg-slate-800 p-8 rounded-[35px] border border-gray-700 shadow-xl space-y-4">
+                <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Link Ativo da Roleta</h2>
+                <input type="text" id="link-input" placeholder="Cole seu link de afiliado aqui..." class="w-full p-4 bg-slate-900 border border-gray-700 rounded-2xl outline-none focus:border-yellow-500 text-sm">
+                <button onclick="salvarLink()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-xs hover:bg-yellow-400 transition shadow-lg">Salvar Sistema</button>
             </div>
 
-            <div class="bg-slate-800 p-6 rounded-3xl border border-gray-700 shadow-xl overflow-hidden">
-                <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">👥 Clientes no Firestore</h2>
+            <div class="bg-slate-800 p-8 rounded-[35px] border border-gray-700 shadow-xl space-y-4">
+                <h2 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Clientes no Firestore</h2>
                 <div id="user-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                     </div>
             </div>
@@ -48,8 +46,7 @@
 
         function salvarLink() {
             const url = document.getElementById('link-input').value;
-            db.collection('config').doc('geral').set({ link_afiliado: url })
-                .then(() => alert("Aplicativo RD TURBO atualizado com sucesso!"));
+            db.collection('config').doc('geral').set({ link_afiliado: url }).then(() => alert("App Atualizado!"));
         }
 
         db.collection('usuarios').orderBy('data', 'desc').onSnapshot((snapshot) => {
@@ -58,20 +55,15 @@
             snapshot.forEach((doc) => {
                 const u = doc.data();
                 list.innerHTML += `
-                    <div class="p-4 bg-slate-900 border border-gray-800 rounded-2xl flex justify-between items-center">
-                        <div>
-                            <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">${u.email}</p>
-                            <p class="text-[8px] text-gray-500">STATUS: VIP</p>
-                        </div>
-                        <button onclick="bloquear('${doc.id}')" class="text-[8px] bg-red-900 text-red-300 px-3 py-1.5 rounded-full font-bold uppercase">Bloquear</button>
+                    <div class="p-4 bg-slate-900 border border-gray-800 rounded-2xl flex justify-between items-center shadow-md">
+                        <span class="text-[10px] font-bold text-blue-400 uppercase">${u.email}</span>
+                        <button onclick="bloquear('${doc.id}')" class="text-[8px] bg-red-900/30 text-red-500 border border-red-500/50 px-3 py-1 rounded-full font-bold uppercase hover:bg-red-500 hover:text-white transition">Excluir</button>
                     </div>`;
             });
         });
 
         function bloquear(id) {
-            if(confirm("Deseja revogar o acesso deste usuário?")) {
-                db.collection('usuarios').doc(id).delete();
-            }
+            if(confirm("Remover acesso do cliente?")) db.collection('usuarios').doc(id).delete();
         }
     </script>
 </body>
