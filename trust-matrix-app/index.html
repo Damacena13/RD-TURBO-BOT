@@ -3,130 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUST MATRIX PRO - ESTRATÉGIA REI</title>
+    <title>TRUST MATRIX PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b1120; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        .card { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; border-radius: 16px; }
-        .input-field { background: #0f172a; border: 1px solid #475569; color: #f8fafc; padding: 12px; border-radius: 10px; width: 100%; text-align: center; }
-        .btn-main { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-weight: 800; text-transform: uppercase; }
-        .btn-active { background: #2563eb; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .card { background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; border-radius: 12px; }
+        .btn-num { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-2" onload="configurarApp()">
 
-    <div class="max-w-md mx-auto space-y-4">
-        <header class="text-center py-4">
-            <h1 class="text-3xl font-black text-yellow-500 italic">TRUST MATRIX <span class="text-white">PRO</span></h1>
-            <p class="text-[10px] text-gray-400 tracking-[4px] uppercase">Estratégia Terminais: 8, 18, 28</p>
-        </header>
-
-        <div class="card p-5 space-y-4">
-            <h2 class="text-xs font-bold text-yellow-500 uppercase border-b border-gray-700 pb-2">📊 Gestão de Banca</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="text-[10px] text-gray-400 font-bold">BANCA INICIAL</label><input type="number" id="b-ini" value="100" class="input-field text-sm"></div>
-                <div><label class="text-[10px] text-gray-400 font-bold">BANCA ATUAL</label><input type="number" id="b-atu" value="100" class="input-field text-sm" oninput="atualizarLucro()"></div>
-                <div><label class="text-[10px] text-green-500 font-bold">STOP GREEN</label><input type="number" id="s-green" value="50" class="input-field text-sm text-green-400"></div>
-                <div><label class="text-[10px] text-red-500 font-bold">STOP LOSS</label><input type="number" id="s-loss" value="30" class="input-field text-sm text-red-400"></div>
+    <div class="max-w-4xl mx-auto space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2 card p-2">
+                <div class="h-[450px] rounded-lg overflow-hidden bg-black">
+                    <iframe id="game-frame" src="https://stake.bet" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
             </div>
-            <div class="bg-black/40 p-3 rounded-xl text-center border border-gray-700">
-                <p class="text-[10px] text-gray-500 uppercase">Lucro/Prejuízo Total</p>
-                <p id="display-lucro" class="text-xl font-black text-white">R$ 0,00</p>
+
+            <div class="card p-4 text-center space-y-4">
+                <h1 class="text-xl font-black text-yellow-500 italic uppercase">Trust Matrix Pro</h1>
+                <div class="grid grid-cols-6 gap-1">
+                    <script>
+                        for(let i=0; i<=36; i++) {
+                            document.write(`<button onclick="analisar(${i})" class="btn-num text-[10px] hover:bg-yellow-500 hover:text-black">${i}</button>`);
+                        }
+                    </script>
+                </div>
+                <button id="btn-auto" onclick="toggleAuto()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase text-xs">Ativar Robô</button>
             </div>
         </div>
-
-        <div class="card p-5 text-center">
-            <h2 class="text-xs font-bold text-blue-400 uppercase mb-3">🔢 Inserir Último Número</h2>
-            <input type="number" id="num-input" placeholder="0-36" class="input-field text-4xl py-6 mb-4 outline-none focus:ring-2 focus:ring-yellow-500" onkeydown="if(event.key==='Enter') analisar()">
-            <button onclick="analisar()" class="w-full py-4 btn-main rounded-xl shadow-lg active:scale-95 transition-transform">Analisar Gatilho</button>
-        </div>
-
-        <button id="btn-auto" onclick="toggleAuto()" class="w-full py-5 bg-gray-700 rounded-2xl font-black uppercase shadow-xl transition-all text-white border border-gray-600">
-            Ativar Tudo (Automático)
-        </button>
-        <p id="label-status" class="text-center text-[9px] text-gray-500 uppercase mt-2 tracking-widest font-bold font-bold">Sistema Offline</p>
     </div>
 
     <script>
         const CONFIG = {
-            TOKEN: "7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c", // Token validado
-            CHAT_ID: "-1003694254792", // Chat ID validado
-            GATILHOS: [8, 18, 28] // Terminais da sua estratégia
+            TOKEN: "7657198446:AAHmD-feLncThbFTiZSswREtGfriljyJf-c", //
+            CHAT_ID: "-1003694254792", //
+            GATILHOS: [8, 18, 28] //
         };
 
         let autoStatus = false;
 
-        function atualizarLucro() {
-            const ini = parseFloat(document.getElementById('b-ini').value) || 0;
-            const atu = parseFloat(document.getElementById('b-atu').value) || 0;
-            const lucro = atu - ini;
-            const display = document.getElementById('display-lucro');
-            display.innerText = `R$ ${lucro.toFixed(2)}`;
-            display.className = lucro >= 0 ? "text-xl font-black text-green-500" : "text-xl font-black text-red-500";
+        function configurarApp() {
+            const linkSalvo = localStorage.getItem('url_afiliado_trust');
+            if (linkSalvo) document.getElementById('game-frame').src = linkSalvo;
         }
 
         async function notify(msg) {
             const url = `https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`;
-            try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" })
-                });
-            } catch (e) { console.error("Erro na conexão"); }
+            await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: msg, parse_mode: "HTML" }) });
         }
 
         function toggleAuto() {
             autoStatus = !autoStatus;
-            const btn = document.getElementById('btn-auto');
-            const lbl = document.getElementById('label-status');
-
-            if(autoStatus) {
-                btn.innerText = "Parar Monitoramento";
-                btn.classList.add('btn-active');
-                lbl.innerText = "📡 Monitorando Mesa: 8-18-28";
-                lbl.className = "text-center text-[9px] text-green-400 uppercase mt-2 tracking-widest font-bold animate-pulse";
-                notify("🚀 <b>MONITORAMENTO ATIVADO</b>\nEstratégia: Terminais 8, 18, 28\nStatus: Buscando Oportunidades...");
-            } else {
-                btn.innerText = "Ativar Tudo (Automático)";
-                btn.classList.remove('btn-active');
-                lbl.innerText = "Sistema Offline";
-                lbl.className = "text-center text-[9px] text-gray-500 uppercase mt-2 tracking-widest font-bold";
-                notify("⚠️ <b>MONITORAMENTO DESATIVADO</b>\nO robô foi pausado.");
-            }
+            document.getElementById('btn-auto').innerText = autoStatus ? "🔴 PARAR" : "🔵 ATIVAR ROBÔ";
         }
 
-        function analisar() {
-            const input = document.getElementById('num-input');
-            const val = parseInt(input.value);
-            
-            if (isNaN(val) || val < 0 || val > 36) { 
-                alert("Número inválido!"); 
-                return; 
+        function analisar(n) {
+            if (CONFIG.GATILHOS.includes(n)) {
+                const msg = `🎯 <b>SINAL CONFIRMADO!</b>\n🎰 Roleta: Oficial\n🔢 Gatilho: ${n}\n\n✅ <b>ALVOS:</b> 1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34\n💎 <b>Cobrir o 0</b>\n🛡️ Max 1 Gale`;
+                if(autoStatus) notify(msg);
             }
-
-            // Lógica com os números alvos exatos fornecidos
-            if (CONFIG.GATILHOS.includes(val)) {
-                const msg = `
-🎰 <b>SINAL CONFIRMADO!</b>
-🎯 Gatilho Identificado: Terminal 8 (${val})
-
-✅ <b>REALIZAR ENTRADA EM:</b>
-• Alvos: 1, 3, 5, 6, 7, 8, 12, 15, 16, 17, 18, 19, 22, 23, 26, 28, 29, 30, 32, 33, 34
-💎 <b>Cobrir o Zero (0)</b>
-
-🛡️ <b>Gestão: Fazer até 1 Gale</b>
-                `;
-                if(autoStatus) {
-                    notify(msg);
-                } else {
-                    alert("Gatilho detectado! Ative o sistema automático para enviar ao Telegram.");
-                }
-            }
-
-            input.value = "";
-            input.focus();
         }
     </script>
 </body>
