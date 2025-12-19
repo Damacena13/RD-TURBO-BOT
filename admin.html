@@ -2,26 +2,37 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>CENTRAL MASTER - GESTÃO</title>
+    <title>CENTRAL MASTER - RD TURBO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-[#0b1120] text-white p-4">
-    <div class="max-w-4xl mx-auto bg-slate-800 p-8 rounded-3xl border-2 border-yellow-500 shadow-2xl">
-        <h1 class="text-3xl font-black text-yellow-500 mb-6 italic uppercase">CENTRAL MASTER</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
-            <div class="bg-slate-900 p-6 rounded-2xl border border-gray-700">
-                <h2 class="text-yellow-500 font-bold mb-4 uppercase">Link do Robô</h2>
-                <input type="text" id="link_afiliado" class="w-full p-4 bg-slate-800 rounded-xl mb-4 text-white border border-gray-600 outline-none">
-                <button onclick="salvarConfig()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase">Salvar Sistema</button>
+<body class="bg-[#0b1120] text-white p-6 font-sans">
+    <div class="max-w-5xl mx-auto bg-slate-800 p-8 rounded-[40px] border-2 border-yellow-500 shadow-2xl">
+        <header class="flex items-center gap-4 mb-10 border-b border-gray-700 pb-6">
+            <img src="icon.jpg" class="w-16 h-16 rounded-full border-2 border-yellow-500">
+            <div>
+                <h1 class="text-3xl font-black text-yellow-500 italic uppercase italic">Central Master</h1>
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Gestão de Assinaturas</p>
             </div>
-            <div class="bg-slate-900 p-6 rounded-2xl border border-gray-700">
-                <h2 class="text-yellow-500 font-bold mb-4 uppercase">Gestão de Clientes</h2>
-                <div id="lista-clientes" class="space-y-3 max-h-80 overflow-y-auto pr-2 text-left">Carregando...</div>
-            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <section class="bg-slate-900 p-8 rounded-3xl border border-gray-700 shadow-inner text-center">
+                <h2 class="text-yellow-500 font-black mb-6 uppercase italic">Link do Robô</h2>
+                <input type="text" id="link_afiliado" placeholder="Cole o link de destino aqui..." class="w-full p-5 bg-slate-800 rounded-2xl mb-6 text-white border border-gray-600 focus:border-yellow-500 outline-none">
+                <button onclick="salvarLink()" class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl uppercase hover:bg-yellow-400 transition shadow-lg">Salvar Sistema</button>
+            </section>
+
+            <section class="bg-slate-900 p-8 rounded-3xl border border-gray-700 shadow-inner">
+                <h2 class="text-yellow-500 font-black mb-6 uppercase italic">Gestão de Clientes</h2>
+                <div id="lista-usuarios" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    <p class="text-gray-500 text-sm animate-pulse">Carregando usuários do banco...</p>
+                </div>
+            </section>
         </div>
     </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
@@ -35,30 +46,32 @@
         const db = firebase.firestore();
 
         db.collection('usuarios').orderBy('data', 'desc').onSnapshot(snap => {
-            const lista = document.getElementById('lista-clientes');
-            lista.innerHTML = '';
+            const container = document.getElementById('lista-usuarios');
+            container.innerHTML = '';
             snap.forEach(doc => {
                 const u = doc.data();
-                const corStatus = u.status === 'liberado' ? 'text-green-500' : 'text-yellow-500 font-bold';
-                lista.innerHTML += `
-                    <div class="p-4 bg-slate-800 rounded-xl border border-gray-700">
-                        <p class="text-sm truncate">${u.email}</p>
-                        <p class="text-[10px] uppercase ${corStatus} mb-2">Status: ${u.status}</p>
+                const statusColor = u.status === 'liberado' ? 'text-green-400' : 'text-yellow-400 font-black';
+                container.innerHTML += `
+                    <div class="p-5 bg-slate-800 rounded-2xl border border-gray-700 flex flex-col gap-4">
+                        <div class="flex justify-between items-start">
+                            <span class="text-sm font-bold truncate max-w-[180px]">${u.email}</span>
+                            <span class="text-[10px] uppercase ${statusColor}">${u.status}</span>
+                        </div>
                         <div class="flex gap-2">
-                            <button onclick="mudarStatus('${doc.id}', 'liberado')" class="flex-1 bg-green-600 text-[10px] font-bold py-2 rounded uppercase">Liberar</button>
-                            <button onclick="mudarStatus('${doc.id}', 'pendente')" class="flex-1 bg-red-600 text-[10px] font-bold py-2 rounded uppercase">Bloquear</button>
+                            <button onclick="mudarStatus('${doc.id}', 'liberado')" class="flex-1 bg-green-600 hover:bg-green-500 text-[10px] font-black py-3 rounded-xl uppercase">Liberar</button>
+                            <button onclick="mudarStatus('${doc.id}', 'pendente')" class="flex-1 bg-red-600 hover:bg-red-500 text-[10px] font-black py-3 rounded-xl uppercase">Bloquear</button>
                         </div>
                     </div>`;
             });
         });
 
-        function mudarStatus(id, novoStatus) {
-            db.collection('usuarios').doc(id).update({ status: novoStatus }).then(() => alert("Status atualizado!"));
+        function mudarStatus(id, s) {
+            db.collection('usuarios').doc(id).update({ status: s }).then(() => alert("Status atualizado!"));
         }
 
-        function salvarConfig() {
-            const link = document.getElementById('link_afiliado').value;
-            db.collection('config').doc('geral').set({ link_afiliado: link }, { merge: true }).then(() => alert("Salvo!"));
+        function salvarLink() {
+            const l = document.getElementById('link_afiliado').value;
+            db.collection('config').doc('geral').set({ link_afiliado: l }, { merge: true }).then(() => alert("Link Salvo!"));
         }
     </script>
 </body>
