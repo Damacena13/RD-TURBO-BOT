@@ -32,7 +32,7 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q"
+            apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
             authDomain: "rd-turbo-bot.firebaseapp.com",
             projectId: "rd-turbo-bot",
             storageBucket: "rd-turbo-bot.firebasestorage.app",
@@ -57,7 +57,6 @@
             const tel = document.getElementById('cad-tel').value;
             const email = document.getElementById('cad-email').value;
             const pass = document.getElementById('cad-pass').value;
-
             if(!nome || !tel || !email || !pass) return alert("Preencha toda a ficha!");
 
             auth.createUserWithEmailAndPassword(email, pass).then((u) => {
@@ -89,4 +88,3 @@
     </script>
 </body>
 </html>
-
