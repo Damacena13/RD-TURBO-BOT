@@ -15,7 +15,7 @@
         <h1 class="text-2xl font-black text-yellow-500 mb-6 italic uppercase">RD TURBO BOT</h1>
         <input type="email" id="email" placeholder="Seu E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
         <input type="password" id="pass" placeholder="Sua Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
-        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase mb-4 transition active:scale-95">ENTRAR NO SISTEMA</button>
+        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase mb-4 active:scale-95 transition">ENTRAR NO SISTEMA</button>
         <button onclick="cadastrar()" class="text-yellow-500 font-bold underline text-sm uppercase">CRIAR NOVO ACESSO</button>
     </div>
 
@@ -38,14 +38,15 @@
             auth.signInWithEmailAndPassword(e, p).then((user) => {
                 db.collection('usuarios').doc(user.user.uid).get().then(doc => {
                     if (doc.exists && doc.data().status === 'liberado') {
-                        // Aqui você coloca o link do seu robô
-                        window.location.href = "https://seu-link-do-robo-aqui.com";
+                        db.collection('config').doc('geral').get().then(config => {
+                            window.location.href = config.data().link_afiliado;
+                        });
                     } else {
                         alert("ACESSO PENDENTE: Sua assinatura ainda não foi liberada pelo administrador.");
                         auth.signOut();
                     }
                 });
-            }).catch(err => alert("Dados inválidos ou usuário não encontrado."));
+            }).catch(() => alert("Dados inválidos ou usuário não encontrado."));
         }
 
         function cadastrar() {
@@ -53,12 +54,8 @@
             const p = document.getElementById('pass').value;
             auth.createUserWithEmailAndPassword(e, p).then((user) => {
                 db.collection('usuarios').doc(user.user.uid).set({
-                    email: e,
-                    status: 'pendente',
-                    data: new Date()
-                }).then(() => {
-                    alert("CADASTRO REALIZADO! Sua conta está em análise. Chame o suporte para liberar o acesso.");
-                });
+                    email: e, status: 'pendente', data: new Date()
+                }).then(() => alert("CADASTRO REALIZADO! Sua conta está em análise. Chame o suporte para liberar."));
             }).catch(err => alert("Erro ao cadastrar: " + err.message));
         }
     </script>
