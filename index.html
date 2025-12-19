@@ -14,34 +14,31 @@
     
     <div id="box-login" class="bg-slate-800 p-8 rounded-3xl w-full max-w-sm border-2 border-yellow-500 shadow-2xl text-center">
         <h1 class="text-2xl font-black text-yellow-500 mb-6 italic uppercase">RD TURBO BOT</h1>
-        <input type="email" id="login-email" placeholder="Seu E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none focus:border-yellow-500">
-        <input type="password" id="login-pass" placeholder="Sua Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none focus:border-yellow-500">
-        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase mb-4 hover:bg-yellow-400 transition active:scale-95">Entrar no Sistema</button>
+        <input type="email" id="login-email" placeholder="E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
+        <input type="password" id="login-pass" placeholder="Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
+        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase mb-4 hover:bg-yellow-400">Entrar</button>
         <button onclick="abrirCadastro()" class="text-yellow-500 font-bold underline text-sm uppercase">Criar Nova Assinatura</button>
     </div>
 
     <div id="box-cadastro" class="hidden bg-slate-800 p-8 rounded-3xl w-full max-w-sm border-2 border-yellow-500 shadow-2xl text-center">
-        <h1 class="text-xl font-black text-yellow-500 mb-2 italic uppercase">CADASTRO DE CLIENTE</h1>
-        <p class="text-[10px] text-gray-400 mb-6 uppercase">Preencha para solicitar liberação</p>
-        
+        <h1 class="text-xl font-black text-yellow-500 mb-4 uppercase italic">Cadastro de Cliente</h1>
         <input type="text" id="cad-nome" placeholder="Nome Completo" class="w-full p-3 mb-3 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
-        <input type="text" id="cad-tel" placeholder="WhatsApp (DDD)" class="w-full p-3 mb-3 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
+        <input type="text" id="cad-tel" placeholder="WhatsApp" class="w-full p-3 mb-3 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
         <input type="email" id="cad-email" placeholder="E-mail de Acesso" class="w-full p-3 mb-3 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
         <input type="password" id="cad-pass" placeholder="Crie uma Senha" class="w-full p-3 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
-        
-        <button onclick="realizarCadastro()" class="w-full bg-green-600 text-white font-black py-4 rounded-xl uppercase mb-4 hover:bg-green-500 transition">Solicitar Acesso</button>
-        <button onclick="voltarLogin()" class="text-gray-400 font-bold text-xs uppercase italic">Voltar ao Login</button>
+        <button onclick="realizarCadastro()" class="w-full bg-green-600 text-white font-black py-4 rounded-xl uppercase mb-4">Solicitar Acesso</button>
+        <button onclick="voltarLogin()" class="text-gray-400 font-bold text-xs uppercase italic">Voltar</button>
     </div>
 
     <script>
-const firebaseConfig = {
-    apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
-    authDomain: "rd-turbo-bot.firebaseapp.com",
-    projectId: "rd-turbo-bot",
-    storageBucket: "rd-turbo-bot.firebasestorage.app",
-    messagingSenderId: "681502711638",
-    appId: "1:681502711638:web:0b43afb70cae48bd1dc0f7"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
+            authDomain: "rd-turbo-bot.firebaseapp.com",
+            projectId: "rd-turbo-bot",
+            storageBucket: "rd-turbo-bot.firebasestorage.app",
+            messagingSenderId: "681502711638",
+            appId: "1:681502711638:web:0b43afb70cae48bd1dc0f7"
+        };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -50,7 +47,6 @@ const firebaseConfig = {
             document.getElementById('box-login').classList.add('hidden');
             document.getElementById('box-cadastro').classList.remove('hidden');
         }
-
         function voltarLogin() {
             document.getElementById('box-cadastro').classList.add('hidden');
             document.getElementById('box-login').classList.remove('hidden');
@@ -62,41 +58,34 @@ const firebaseConfig = {
             const email = document.getElementById('cad-email').value;
             const pass = document.getElementById('cad-pass').value;
 
-            if(!nome || !tel || !email || !pass) return alert("Preencha todos os campos da ficha!");
+            if(!nome || !tel || !email || !pass) return alert("Preencha toda a ficha!");
 
-            auth.createUserWithEmailAndPassword(email, pass).then((user) => {
-                db.collection('usuarios').doc(user.user.uid).set({
-                    nome: nome,
-                    whatsapp: tel,
-                    email: email,
-                    status: 'pendente',
-                    data: new Date()
+            auth.createUserWithEmailAndPassword(email, pass).then((u) => {
+                db.collection('usuarios').doc(u.user.uid).set({
+                    nome, whatsapp: tel, email, status: 'pendente', data: new Date()
                 }).then(() => {
-                    alert("CADASTRO ENVIADO! Aguarde a liberação do administrador no WhatsApp.");
+                    alert("SOLICITAÇÃO ENVIADA! Aguarde a liberação.");
                     voltarLogin();
                 });
-            }).catch(err => alert("Erro no cadastro: " + err.message));
+            }).catch(err => alert("Erro: " + err.message));
         }
 
         function login() {
             const e = document.getElementById('login-email').value;
             const p = document.getElementById('login-pass').value;
-            auth.signInWithEmailAndPassword(e, p).then((user) => {
-                db.collection('usuarios').doc(user.user.uid).get().then(doc => {
+            auth.signInWithEmailAndPassword(e, p).then((u) => {
+                db.collection('usuarios').doc(u.user.uid).get().then(doc => {
                     if (doc.exists && doc.data().status === 'liberado') {
                         db.collection('config').doc('geral').get().then(c => {
                             window.location.href = c.data().link_afiliado;
                         });
                     } else {
-                        alert("ACESSO BLOQUEADO: Sua assinatura ainda não foi liberada.");
+                        alert("ACESSO PENDENTE: Aguarde liberação do suporte.");
                         auth.signOut();
                     }
                 });
-            }).catch(() => alert("E-mail ou senha incorretos."));
+            }).catch(() => alert("Login inválido."));
         }
     </script>
 </body>
 </html>
-
-
-
