@@ -1,30 +1,74 @@
-<div id="lista-clientes" class="space-y-4">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>CENTRAL MASTER - GESTÃO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-[#0b1120] text-white p-4">
+    <div class="max-w-4xl mx-auto bg-slate-800 p-8 rounded-3xl border-2 border-yellow-500 shadow-2xl">
+        <h1 class="text-3xl font-black text-yellow-500 mb-6 italic uppercase">CENTRAL MASTER</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-gray-700">
+                <h2 class="text-yellow-500 font-bold mb-4 uppercase">Link do Robô</h2>
+                <input type="text" id="link_afiliado" class="w-full p-4 bg-slate-800 rounded-xl mb-4 text-white border border-gray-600 outline-none">
+                <button onclick="salvarConfig()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl hover:bg-yellow-400 transition uppercase">Salvar Sistema</button>
+            </div>
+            <div class="bg-slate-900 p-6 rounded-2xl border border-gray-700">
+                <h2 class="text-yellow-500 font-bold mb-4 uppercase">Gestão de Clientes</h2>
+                <div id="lista-clientes" class="space-y-3 max-h-80 overflow-y-auto pr-2">
+                    Carregando clientes...
+                </div>
+            </div>
+        </div>
     </div>
 
-<script>
-    db.collection('usuarios').onSnapshot(snap => {
-        const lista = document.getElementById('lista-clientes');
-        lista.innerHTML = '';
-        snap.forEach(doc => {
-            const user = doc.data();
-            lista.innerHTML += `
-                <div class="p-4 bg-slate-900 rounded-xl flex justify-between items-center border border-gray-700">
-                    <div>
-                        <p class="text-white font-bold">${user.email}</p>
-                        <p class="text-xs ${user.status === 'liberado' ? 'text-green-500' : 'text-yellow-500'}">
-                            STATUS: ${user.status.toUpperCase()}
-                        </p>
-                    </div>
-                    <button onclick="liberarUsuario('${doc.id}')" class="bg-green-600 px-4 py-2 rounded-lg text-xs font-black">
-                        LIBERAR ACESSO
-                    </button>
-                </div>
-            `;
-        });
-    });
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTg80PDHFMG7hFMn8fh3dPW7oHYakvc-Q",
+            authDomain: "rd-turbo-bot.firebaseapp.com",
+            projectId: "rd-turbo-bot",
+            storageBucket: "rd-turbo-bot.firebasestorage.app",
+            messagingSenderId: "681502711638",
+            appId: "1:681502711638:web:0b43afb70cae48bd1dc0f7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    function liberarUsuario(id) {
-        db.collection('usuarios').doc(id).update({ status: 'liberado' })
-        .then(() => alert("Assinatura Ativada com Sucesso!"));
-    }
-</script>
+        // Carrega usuários e botões de ação
+        db.collection('usuarios').orderBy('data', 'desc').onSnapshot(snap => {
+            const lista = document.getElementById('lista-clientes');
+            lista.innerHTML = '';
+            snap.forEach(doc => {
+                const u = doc.data();
+                const corStatus = u.status === 'liberado' ? 'text-green-500' : 'text-yellow-500 font-bold';
+                lista.innerHTML += `
+                    <div class="p-4 bg-slate-800 rounded-xl border border-gray-700 flex flex-col gap-3">
+                        <div>
+                            <p class="text-sm truncate">${u.email}</p>
+                            <p class="text-[10px] uppercase ${corStatus}">Status: ${u.status}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="mudarStatus('${doc.id}', 'liberado')" class="flex-1 bg-green-600 text-[10px] font-bold py-2 rounded uppercase">Liberar</button>
+                            <button onclick="mudarStatus('${doc.id}', 'pendente')" class="flex-1 bg-red-600 text-[10px] font-bold py-2 rounded uppercase">Bloquear</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function mudarStatus(id, novoStatus) {
+            db.collection('usuarios').doc(id).update({ status: novoStatus })
+            .then(() => alert("Status atualizado com sucesso!"));
+        }
+
+        function salvarConfig() {
+            const link = document.getElementById('link_afiliado').value;
+            db.collection('config').doc('geral').set({ link_afiliado: link }, { merge: true })
+            .then(() => alert("Configurações salvas!"));
+        }
+    </script>
+</body>
+</html>
