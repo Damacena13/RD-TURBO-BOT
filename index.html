@@ -12,11 +12,11 @@
 <body class="bg-[#0b1120] text-white flex flex-col items-center justify-center min-h-screen p-4">
     <img src="icon.jpg" alt="Logo" class="w-32 h-32 rounded-full border-4 border-yellow-500 mb-8 shadow-2xl object-cover">
     <div class="bg-slate-800 p-8 rounded-3xl w-full max-w-sm border-2 border-yellow-500 shadow-2xl text-center">
-        <h1 class="text-2xl font-black text-yellow-500 mb-6 italic uppercase tracking-tighter">RD TURBO BOT</h1>
+        <h1 class="text-2xl font-black text-yellow-500 mb-6 italic uppercase">RD TURBO BOT</h1>
         <input type="email" id="email" placeholder="Seu E-mail" class="w-full p-4 mb-4 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
         <input type="password" id="pass" placeholder="Sua Senha" class="w-full p-4 mb-6 bg-slate-900 border border-gray-600 rounded-xl text-white outline-none">
-        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase mb-4 hover:bg-yellow-400 transition active:scale-95">Entrar no Sistema</button>
-        <button onclick="cadastrar()" class="text-yellow-500 font-bold underline text-sm uppercase">Criar novo acesso</button>
+        <button onclick="login()" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase mb-4 active:scale-95 transition">ENTRAR NO SISTEMA</button>
+        <button onclick="cadastrar()" class="text-yellow-500 font-bold underline text-sm uppercase">CRIAR NOVO ACESSO</button>
     </div>
 
     <script>
@@ -39,25 +39,25 @@
                 db.collection('usuarios').doc(user.user.uid).get().then(doc => {
                     if (doc.exists && doc.data().status === 'liberado') {
                         db.collection('config').doc('geral').get().then(c => {
-                            window.location.href = c.data().link_afiliado;
+                            window.location.href = c.data().link_afiliado || "#";
                         });
                     } else {
                         alert("ACESSO PENDENTE: Sua assinatura ainda não foi liberada. Chame o suporte!");
                         auth.signOut();
                     }
                 });
-            }).catch(() => alert("Dados incorretos ou usuário não cadastrado."));
+            }).catch(() => alert("Dados incorretos ou usuário não cadastrado. Clique em CRIAR NOVO ACESSO primeiro."));
         }
 
         function cadastrar() {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if(!e || !p) return alert("Preencha os campos!");
+            if(!e || !p) return alert("Preencha e-mail e senha para cadastrar!");
             auth.createUserWithEmailAndPassword(e, p).then((user) => {
                 db.collection('usuarios').doc(user.user.uid).set({
                     email: e, status: 'pendente', data: new Date()
-                }).then(() => alert("CADASTRO REALIZADO! Chame o suporte para liberar seu acesso."));
-            }).catch(err => alert("Erro: " + err.message));
+                }).then(() => alert("CADASTRO REALIZADO COM SUCESSO! Agora chame o administrador para liberar seu acesso."));
+            }).catch(err => alert("Erro ao cadastrar: " + err.message));
         }
     </script>
 </body>
